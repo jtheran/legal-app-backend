@@ -1,0 +1,98 @@
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+enum Role {
+  ADMIN
+  LAWYER
+}
+
+enum CaseStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  ARCHIVED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  dni       String   @unique
+  name      String
+  role      Role     @default(LAWYER)
+  clients   Client[]
+  cases     Case[]
+  createdAt DateTime @default(now())
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  dni       String   @unique
+  phone     String?
+  email     String?
+  cases     Case[]
+  lawyer    User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Case {
+  id          String     @id @default(uuid())
+  folderNumber String    @unique // Número de expediente
+  title       String
+  description String?
+  status      CaseStatus @default(OPEN)
+  documents   Document[]
+  lawyer      User       @relation(fields: [userId], references: [id])
+  userId      String
+  client      Client     @relation(fields: [clientId], references: [id])
+  clientId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  name      String
+  url       String   // URL de S3
+  type      String   // pdf, docx, etc.
+  size      Int      // Tamaño en bytes
+  vectorId  String?  // Referencia en Qdrant para el RAG
+  case      Case     @relation(fields: [caseId], references: [id])
+  caseId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  userEmail   String?
+  userRole    String?
+  action      String   // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, VIEW, DOWNLOAD
+  resource    String   // document, user, auth, system
+  resourceId  String?
+  description String?
+  oldData     Json?
+  newData     Json?
+  ip          String?
+  userAgent   String?
+  status      String   @default("SUCCESS") // SUCCESS | FAILED
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

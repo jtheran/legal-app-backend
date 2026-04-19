@@ -1,0 +1,141 @@
+/audit:
+  get:
+    tags: [Audit]
+    summary: Listar registros de auditoría
+    description: >
+      Retorna una lista paginada de logs de actividad. 
+      Permite filtrar por usuario, acción, recurso y rango de fechas.
+      Acceso restringido a administradores.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
+      - name: action
+        in: query
+        schema:
+          type: string
+          example: "LOGIN"
+      - name: resource
+        in: query
+        schema:
+          type: string
+          example: "document"
+      - name: startDate
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: endDate
+        in: query
+        schema:
+          type: string
+          format: date
+    responses:
+      200:
+        description: Lista de logs obtenida exitosamente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditListResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - Requiere rol de ADMIN
+
+/audit/export-json:
+  get:
+    tags: [Audit]
+    summary: Exportar auditoría a archivo JSON
+    description: Genera y descarga un archivo (JSON) con el historial completo de auditoría.
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Archivo de auditoría generado
+        content:
+          text/csv:
+            schema:
+              type: string
+              format: binary
+          application/json:
+            schema:
+              type: string
+              format: binary
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+/audit/export-csv:
+  get:
+    tags: [Audit]
+    summary: Exportar auditoría a archivo CSV
+    description: Genera y descarga un archivo (CSV) con el historial completo de auditoría.
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Archivo de auditoría generado
+        content:
+          text/csv:
+            schema:
+              type: string
+              format: binary
+          application/json:
+            schema:
+              type: string
+              format: binary
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+
+/audit/purge:
+  delete:
+    tags: [Audit]
+    summary: Eliminar todos los logs de auditoría
+    description: Limpia por completo la tabla de auditoría. Acción irreversible.
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Logs eliminados correctamente
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Se eliminaron 1540 registros con éxito."
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+/audit/{id}:
+  get:
+    tags: [Audit]
+    summary: Obtener detalle de un log específico
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Detalle del log de auditoría
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditLog'
+      404:
+        $ref: '#/components/responses/NotFound'

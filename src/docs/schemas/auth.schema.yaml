@@ -1,0 +1,75 @@
+LoginRequest:
+  type: object
+  required:
+    - email
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      example: "admin@legal.com"
+    password:
+      type: string
+      format: password
+      example: "Admin123!"
+
+LoginResponse:
+  type: object
+  properties:
+    token:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    user:
+      $ref: '#/components/schemas/UserProfile'
+
+RegisterRequest:
+  type: object
+  required:
+    - email
+    - password
+    - name
+    - dni
+  properties:
+    email:
+      type: string
+      format: email
+      example: "abogado@legal.com"
+    password:
+      type: string
+      format: password
+      example: "Abogado123!"
+    name:
+      type: string
+      example: "María García"
+    dni:
+      type: string
+      example: "87654321"
+
+UserProfile:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    name:
+      type: string
+      example: "Juan Pérez"
+    email:
+      type: string
+      format: email
+      example: "juan@legal.com"
+    role:
+      type: string
+      enum: [ADMIN, LAWYER]
+      example: "LAWYER"
+    dni:
+      type: string
+      example: "12345678"
+
+ErrorResponse:
+  type: object
+  properties:
+    message:
+      type: string
+      example: "Error interno del servidor"

@@ -1,0 +1,71 @@
+AuditLog:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6"
+    userId:
+      type: string
+      nullable: true
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    userEmail:
+      type: string
+      example: "abogado@legal.com"
+    userRole:
+      type: string
+      example: "LAWYER"
+    action:
+      type: string
+      example: "CREATE"
+    resource:
+      type: string
+      example: "document"
+    resourceId:
+      type: string
+      nullable: true
+    description:
+      type: string
+      example: "CREATE realizado en document vía POST"
+    oldData:
+      type: object
+      nullable: true
+    newData:
+      type: object
+      nullable: true
+    ip:
+      type: string
+      example: "192.168.1.1"
+    userAgent:
+      type: string
+      example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)..."
+    status:
+      type: string
+      enum: [SUCCESS, FAILED]
+      example: "SUCCESS"
+    metadata:
+      type: object
+    createdAt:
+      type: string
+      format: date-time
+      example: "2026-04-18T11:00:00Z"
+
+AuditListResponse:
+  type: object
+  properties:
+    data:
+      type: array
+      items:
+        $ref: '#/components/schemas/AuditLog'
+    meta:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 100
+        page:
+          type: integer
+          example: 1
+        lastPage:
+          type: integer
+          example: 5
