@@ -77,7 +77,7 @@
         $ref: '#/components/responses/NotFound'
 
 /auth/logout:
-  post:
+  get:
     tags: [Auth]
     summary: Cerrar sesión
     description: Invalida la sesión eliminando el registro en Redis.

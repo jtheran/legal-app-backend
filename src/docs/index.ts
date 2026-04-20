@@ -40,12 +40,12 @@ export const buildSwaggerDocument = () => ({
   },
   servers: [
     {
-      url: `http://${config.HOST}:${config.PORT}/api`,
+      url: `http://${config.HOST}:${config.PORT}${config.API_PREFIX}`,
       description: 'Servidor de desarrollo',
       schemes: ['http'],
     },
     {
-      url: `https://${config.HOST}:${config.PORT}/api`,
+      url: `https://${config.HOST}:${config.PORT}${config.API_PREFIX}`,
       description: 'Servidor de producción',
       schemes: ['https'],
     },
@@ -93,6 +93,15 @@ export const buildSwaggerDocument = () => ({
           'application/json': {
             schema: { $ref: '#/components/schemas/ErrorResponse' },
             example: { message: 'Error interno del servidor' },
+          },
+        },
+      },
+      Forbidden: {
+        description: 'Acceso denegado. Se requiere rol ADMIN.',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ErrorResponse' },
+            example: { message: 'Acceso denegado. Se requiere rol ADMIN.' },
           },
         },
       },

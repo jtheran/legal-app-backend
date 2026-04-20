@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { createCase } from '../controllers/case.controller';
 import { isAuth } from '../middlewares/auth.middleware';
-import { validate } from '../middlewares/validate';
+import { validate } from '../middlewares/validate.middleware';
 import { createCaseSchema } from '../schemas/case.schema';
 
 const router = Router();

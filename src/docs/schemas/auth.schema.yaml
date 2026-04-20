@@ -7,7 +7,7 @@ LoginRequest:
     email:
       type: string
       format: email
-      example: "admin@legal.com"
+      example: "[EMAIL_ADDRESS]"
     password:
       type: string
       format: password

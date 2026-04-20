@@ -5,7 +5,7 @@ import logger from '../config/logger';
 import config from '../config/config';
 
 const connection = new IORedis(
-    config.REDIS_URL, {
+    config.REDIS_URL_COMPLETED, {
     maxRetriesPerRequest: null,
     }
 );

@@ -1,11 +1,14 @@
 import { initQdrantCollection } from './config/qdrant';
 import { connectRedis, redisClient } from './config/redis';
 import { runSeed } from './seed/seed';
+import { initSocket } from './config/socket';
+import { createServer } from 'http'
 import { checkInfrastructure } from './utils/healthCheck';
 import { runMigrations } from './utils/runMigrations';
 import { createApp } from './app';
 import { createLimiters } from './security/rateLimiter'
 import config from './config/config';
+import path from 'path';
 
 async function startServer() {
   try {
@@ -18,7 +21,10 @@ async function startServer() {
 
     const { globalLimiter, authLimiter } = createLimiters(redisClient)
 
-    const server = createApp({ globalLimiter, authLimiter })
+    const app = createApp({ globalLimiter, authLimiter })
+    const server = createServer(app)
+
+    initSocket(server)
 
     server.listen(config.PORT, () => {
       console.log(`
@@ -26,10 +32,16 @@ async function startServer() {
         --------------------------------
         📍 Puerto: ${config.PORT}
         📍 Host: ${config.HOST}
-        📂 Archivos: MinIO activo (Puerto 9000)
+        📍 Api Prefix: ${config.API_PREFIX}
+        📂 Archivos: MinIO activo
         🧠 IA: Compatible con LM Studio y modelo ${config.AI_MODEL}
-        📚 Docs: http://${config.HOST}:${config.PORT}/api/docs
-        📧 Email: ${config.EMAIL_USER}
+        📚 Docs: Activa
+        📧 Email: ${config.EMAIL_FROM}
+        📅 Eventos: Activos
+        🔌 WebSocket: Activo
+        ⏰ Workers: Activos
+        📊 Rate Limit: ${config.RATE_LIMIT_MAX} requests cada ${config.RATE_LIMIT_WINDOW_MS / 60000} minutos
+        📁 Logs: ${path.join(__dirname, 'logs')}
         --------------------------------
       `);
     });

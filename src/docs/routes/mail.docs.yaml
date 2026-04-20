@@ -1,0 +1,66 @@
+/mail/send:
+  post:
+    tags: [Email]
+    summary: Enviar correo individual
+    description: >
+      Encola un correo electrónico para ser enviado a un destinatario específico.
+      El contenido puede incluir etiquetas HTML.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IndividualEmailRequest'
+    responses:
+      200:
+        description: Correo encolado exitosamente
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Correo encolado para abogado@ejemplo.com"
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      500:
+        $ref: '#/components/responses/InternalError'
+
+/mail/send-massive-email:
+  post:
+    tags: [Email]
+    summary: Envío masivo a abogados (Solo Admin)
+    description: >
+      Busca a todos los usuarios con rol 'LAWYER' en la base de datos y 
+      encola un correo para cada uno. Ideal para anuncios de mantenimiento.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MassiveEmailRequest'
+    responses:
+      200:
+        description: Envío masivo iniciado
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Envío masivo iniciado"
+                totalRecipients:
+                  type: integer
+                  example: 45
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - Requiere rol de ADMIN
+      404:
+        description: No se encontraron destinatarios

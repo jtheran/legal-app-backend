@@ -1,0 +1,32 @@
+IndividualEmailRequest:
+  type: object
+  required:
+    - to
+    - subject
+    - content
+  properties:
+    to:
+      type: string
+      format: email
+      example: "[EMAIL_ADDRESS]"
+    subject:
+      type: string
+      example: "Actualización de su caso legal #450"
+    content:
+      type: string
+      description: Cuerpo del mensaje. Soporta HTML.
+      example: "<h1>Hola</h1><p>Le informamos que hay nuevos documentos en su caso.</p>"
+
+MassiveEmailRequest:
+  type: object
+  required:
+    - subject
+    - content
+  properties:
+    subject:
+      type: string
+      example: "[AVISO] Mantenimiento de la plataforma programado"
+    content:
+      type: string
+      description: Mensaje para todos los abogados.
+      example: "<p>Estimados abogados, el sistema estará fuera de línea este sábado de 2:00 AM a 4:00 AM.</p>"

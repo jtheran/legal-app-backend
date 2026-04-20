@@ -1,0 +1,131 @@
+/maintenance/status:
+  get:
+    tags: [Maintenance]
+    summary: Estado actual de la plataforma
+    description: >
+      Endpoint público que retorna si la plataforma está en mantenimiento o no.
+      El frontend debe consultar este endpoint al iniciar para mostrar la pantalla
+      de mantenimiento si es necesario.
+    security: []
+    responses:
+      200:
+        description: Estado actual de la plataforma
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/MaintenanceInactive'
+                - $ref: '#/components/schemas/MaintenanceActive'
+            examples:
+              operativa:
+                summary: Plataforma operativa
+                value:
+                  active: false
+                  message: Plataforma operativa
+              mantenimiento:
+                summary: En mantenimiento
+                value:
+                  active: true
+                  message: Estamos realizando mejoras. Volvemos en 30 minutos.
+                  estimatedEnd: "2024-01-15T12:00:00.000Z"
+                  startedAt: "2024-01-15T11:30:00.000Z"
+                  startedBy: admin@legal.com
+      500:
+        $ref: '#/components/responses/InternalError'
+
+/maintenance/enable:
+  post:
+    tags: [Maintenance]
+    summary: Activar modo mantenimiento
+    description: >
+      Bloquea el acceso a todos los endpoints de la plataforma excepto login,
+      status y disable. Todos los requests retornarán HTTP 503 con el mensaje
+      configurado. Solo accesible por ADMIN.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnableMaintenanceRequest'
+          examples:
+            basico:
+              summary: Sin tiempo estimado
+              value:
+                message: La plataforma está en mantenimiento. Volveremos pronto.
+            conTiempo:
+              summary: Con tiempo estimado de fin
+              value:
+                message: Estamos realizando mejoras en la plataforma. Volveremos en 30 minutos.
+                estimatedEnd: "2024-01-15T12:00:00.000Z"
+    responses:
+      200:
+        description: Modo mantenimiento activado exitosamente
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Modo mantenimiento activado
+                data:
+                  $ref: '#/components/schemas/MaintenanceActive'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      500:
+        $ref: '#/components/responses/InternalError'
+
+/maintenance/disable:
+  post:
+    tags: [Maintenance]
+    summary: Desactivar modo mantenimiento
+    description: >
+      Restaura el acceso normal a la plataforma eliminando el bloqueo de
+      mantenimiento. Solo accesible por ADMIN.
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Modo mantenimiento desactivado exitosamente
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Modo mantenimiento desactivado. Plataforma disponible.
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      500:
+        $ref: '#/components/responses/InternalError'
+
+/maintenance/stats:
+  get:
+    tags: [Maintenance]
+    summary: Estadísticas completas de la plataforma
+    description: >
+      Retorna estadísticas de negocio (usuarios, eventos, notificaciones,
+      documentos, emails) y estadísticas del sistema operativo (CPU, RAM,
+      disco, red, procesos, uptime). Solo accesible por ADMIN.
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Estadísticas completas del sistema
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatsResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      500:
+        $ref: '#/components/responses/InternalError'

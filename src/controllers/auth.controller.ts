@@ -4,6 +4,8 @@ import { generateToken } from '../services/auth.services';
 import { createAuditLog } from '../services/audit.services';
 import redisClient from '../config/redis';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import config from '../config/config';
 import { isUserBlocked, registerFailedAttempt, clearFailedAttempts } from '../security/loginProtection';
 
 export const login = async (req: Request, res: Response) => {
@@ -53,7 +55,7 @@ export const login = async (req: Request, res: Response) => {
         await clearFailedAttempts(email)
 
         // 5. Generar JWT y registrar en Redis
-        const token = await generateToken(user.id);
+        const {accessToken, refreshToken} = await generateToken(user.id);
 
         // 6. Responder (sin enviar la contraseña)
         await createAuditLog({
@@ -69,7 +71,8 @@ export const login = async (req: Request, res: Response) => {
         });
 
         res.json({
-            token,
+            accessToken,
+            refreshToken,
             user: {
                 id: user.id,
                 name: user.name,
@@ -78,7 +81,15 @@ export const login = async (req: Request, res: Response) => {
             }
         });
     } catch (error) {
-        console.error('Login Error:', error);
+        await createAuditLog({
+            userEmail: req.body.email,
+            action: 'LOGIN',
+            resource: 'auth',
+            status: 'FAILED',
+            ip: req.ip,
+            description: 'Intento de login fallido',
+            metadata: { error: (error as Error).message }
+        });
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
@@ -129,13 +140,88 @@ export const getProfile = async (req: Request, res: Response) => {
     if (!req.user) {
         return res.status(404).json({ message: 'Usuario no encontrado' });
     }
+
     res.json(req.user);
+};
+
+export const refreshToken = async (req: Request, res: Response) => {
+    const token = req.body.refreshToken;
+
+    if (!token) {
+        await createAuditLog({
+            userId: 'unknown',
+            userEmail: 'unknown',
+            action: 'REFRESH_TOKEN',
+            resource: 'auth',
+            status: 'FAILED',
+            ip: req.ip,
+            description: 'Intento de refresh token fallido',
+            metadata: { error: 'Refresh Token no proporcionado' }
+        });
+        return res.status(401).json({ message: 'Refresh Token no proporcionado' });
+    }
+
+    try {
+        // 1. Verificar firma del token
+        const payload = jwt.verify(token, config.JWT_REFRESH_SECRET) as { sub: string };
+        const userId = payload.sub;
+
+        // 2. Validar contra Redis
+        const storedToken = await redisClient.get(`session:refresh:${userId}`);
+
+        if (!storedToken || storedToken !== token) {
+            await createAuditLog({
+                userId: payload.sub,
+                userEmail: payload.sub,
+                action: 'REFRESH_TOKEN',
+                resource: 'auth',
+                status: 'FAILED',
+                ip: req.ip,
+                description: 'Intento de refresh token fallido'
+            });
+            return res.status(403).json({ message: 'Sesión inválida o expirada' });
+        }
+
+        // 3. Generar nuevo par de tokens (Esto actualiza Redis automáticamente)
+        const { accessToken, refreshToken } = await generateToken(userId);
+
+        // 4. Actualizar cookie segura
+        await createAuditLog({
+            userEmail: payload.sub,
+            action: 'REFRESH_TOKEN',
+            resource: 'auth',
+            status: 'SUCCESS',
+            ip: req.ip,
+            description: 'Token de actualización exitoso'
+        });
+        res.json({ accessToken, refreshToken });
+
+    } catch (error) {
+        await createAuditLog({
+            userEmail: req.body.email,
+            action: 'REFRESH_TOKEN',
+            resource: 'auth',
+            status: 'FAILED',
+            ip: req.ip,
+            description: 'Intento de refresh token fallido',
+            metadata: { error: (error as Error).message }
+        });
+        return res.status(403).json({ message: 'Token de actualización no válido' });
+    }
 };
 
 export const logout = async (req: Request, res: Response) => {
     try {
         const user = req.user as any;
         if (user) {
+
+            if (user.id) {
+            // Eliminamos ambas llaves de Redis de forma atómica
+            await Promise.all([
+                redisClient.del(`session:access:${user.id}`),
+                redisClient.del(`session:refresh:${user.id}`)
+            ]);
+        }
             await createAuditLog({
                 userId: user.id,
                 userEmail: user.email,
@@ -146,10 +232,17 @@ export const logout = async (req: Request, res: Response) => {
                 description: 'Sesión cerrada por el usuario'
             });
         }
-        // Al cerrar sesión, eliminamos el rastro de Redis
-        await redisClient.del(`session:${user.id}`);
-        res.json({ message: 'Sesión cerrada exitosamente' });
+        res.json({ message: `Sesión cerrada exitosamente para el usuario::[${user.email}]` });
     } catch (error) {
+        await createAuditLog({
+            userEmail: req.body.email,
+            action: 'LOGOUT',
+            resource: 'auth',
+            status: 'FAILED',
+            ip: req.ip,
+            description: 'Intento de logout fallido',
+            metadata: { error: (error as Error).message }
+        });
         res.status(500).json({ message: 'Error al cerrar sesión' });
     }
 };

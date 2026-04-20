@@ -2,7 +2,7 @@ import { prisma } from '../config/db';
 import redisClient from '../config/redis';
 import { qdrant } from '../config/qdrant';
 import { s3Client } from '../config/s3Client';
-import { ListBucketsCommand, CreateBucketCommand, HeadBucketCommand } from '@aws-sdk/client-s3'
+import { ListBucketsCommand } from '@aws-sdk/client-s3'
 
 export const checkInfrastructure = async () => {
   try {

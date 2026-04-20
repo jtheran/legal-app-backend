@@ -20,6 +20,16 @@ enum CaseStatus {
   ARCHIVED
 }
 
+enum CourtType {
+  CIVIL
+  PENAL
+  LABORAL
+  FAMILIA
+  ADMINISTRATIVO
+  COMERCIAL
+  CONSTITUCIONAL
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -29,15 +39,23 @@ model User {
   role      Role     @default(LAWYER)
   clients   Client[]
   cases     Case[]
+  events    CalendarEvent[]
+  notifications Notification[]
   createdAt DateTime @default(now())
 }
 
 model Client {
   id        String   @id @default(uuid())
   name      String
+  type     String    @default("NATURAL")
+  companyName    String?
+  address   String
   dni       String   @unique
-  phone     String?
-  email     String?
+  phone     String
+  email     String  @unique
+  city      String    @default("Cartagena")
+  state     String    @default("Bolivar")       
+  country   String    @default("Colombia")
   cases     Case[]
   lawyer    User     @relation(fields: [userId], references: [id])
   userId    String
@@ -45,11 +63,36 @@ model Client {
   updatedAt DateTime @updatedAt
 }
 
+model Court {
+  id             String    @id @default(uuid())
+  name           String                         
+  type           CourtType         // CIVIL | PENAL | LABORAL | FAMILIA | ADMINISTRATIVO | COMERCIAL | CONSTITUCIONAL
+  judgeName      String?                        
+  judgePhone     String?
+  judgeEmail     String?
+  city           String
+  state          String                        
+  country        String    @default("Colombia")
+  address        String?                
+  email          String?
+  isActive       Boolean   @default(true)
+  notes          Json?
+  cases          Case[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([type])
+  @@index([city])
+  @@map("courts")
+}
+
 model Case {
   id          String     @id @default(uuid())
   folderNumber String    @unique // Número de expediente
   title       String
   description String?
+  courtId     String?
+  court       Court?     @relation(fields: [courtId], references: [id])
   status      CaseStatus @default(OPEN)
   documents   Document[]
   lawyer      User       @relation(fields: [userId], references: [id])
@@ -71,6 +114,68 @@ model Document {
   caseId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model CalendarEvent {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime
+  allDay       Boolean   @default(false)
+  location     String?
+  color        String?   @default("#3B82F6")
+  type         String    @default("EVENT")
+  status       String    @default("ACTIVE")
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  reminders    EventReminder[]
+  notifications EventNotification[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([startDate])
+  @@map("calendar_events")
+}
+
+model EventReminder {
+  id        String        @id @default(uuid())
+  eventId   String
+  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  minutesBefore Int       // 120 = 2 horas antes, 1440 = 1 día antes
+  sent      Boolean       @default(false)
+  sentAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@map("event_reminders")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String  
+  resourceId String?
+  read      Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+model EventNotification {
+  id        String        @id @default(uuid())
+  eventId   String
+  event     CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  type      String        // TWO_HOURS | SAME_DAY
+  sent      Boolean       @default(false)
+  sentAt    DateTime?
+
+  @@map("event_notifications")
 }
 
 model AuditLog {

@@ -1,15 +1,21 @@
 import jwt from 'jsonwebtoken';
 import redisClient from '../config/redis';
+import config from '../config/config';
 
 export const generateToken = async (userId: string) => {
     const payload = { sub: userId };
-    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '8h' });
+    const accessToken = jwt.sign(payload, config.JWT_SECRET, { expiresIn: config.JWT_EXPIRES_IN });
+    const refreshToken = jwt.sign(payload, config.JWT_REFRESH_SECRET, { expiresIn: config.JWT_REFRESH_EXPIRES_IN });
 
     // Guardamos en Redis la sesión activa
     // Esto ayuda a mapear rápidamente qué abogado está operando
-    await redisClient.set(`session:${userId}`, token, {
-        EX: 60 * 60 * 8 // 8 horas de expiración en cache
+    await redisClient.set(`session:access:${userId}`, accessToken, {
+        EX: config.JWT_EXPIRES_IN
     });
 
-    return token;
+    await redisClient.set(`session:refresh:${userId}`, refreshToken, {
+        EX: config.JWT_REFRESH_EXPIRES_IN
+    });
+
+    return { accessToken, refreshToken};
 };

@@ -43,7 +43,7 @@ const transports = [
   
   // Rotación diaria para Errores
   new winston.transports.DailyRotateFile({
-    filename: 'logs/error-%DATE%.log',
+    filename: path.join(__dirname, '../logs/error-%DATE%.log'),
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '20m',
@@ -53,7 +53,7 @@ const transports = [
 
   // Rotación diaria para todos los logs (App)
   new winston.transports.DailyRotateFile({
-    filename: 'logs/app-%DATE%.log',
+    filename: path.join(__dirname, '../logs/app-%DATE%.log'),
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '20m',
@@ -62,7 +62,7 @@ const transports = [
 
   // Rotación específica para HTTP
   new winston.transports.DailyRotateFile({
-    filename: 'logs/http-%DATE%.log',
+    filename: path.join(__dirname, '../logs/http-%DATE%.log'),
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '20m',

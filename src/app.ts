@@ -2,13 +2,20 @@ import express, { Application, RequestHandler } from 'express'
 import config from './config/config';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express'
+import passport from 'passport';
+import './config/passport';
 import { swaggerSpec } from './config/swagger'
 import { helmetConfig } from './security/helmet.config'
 import { corsConfig } from './security/cors.config'
 import { xssProtection, hppProtection, mongoSanitization, sanitizeBody } from './security/sanitization'
 import { ipBlocker, attachIP } from './security/ipProtection'
+import { maintenanceMiddleware } from './middlewares/maintance.middleware'
 import documentRoutes from './routes/document.routes';
 import auditRoutes from './routes/audit.routes';
+import mailRoutes from './routes/mail.routes';
+import calendarRoutes from './routes/calendar.routes';
+import maintenanceRoutes from './routes/maintenance.routes';
+import authRoutes from './routes/auth.routes';
 
 
 interface AppLimiters {
@@ -26,19 +33,25 @@ export function createApp({ globalLimiter, authLimiter }: AppLimiters): Applicat
   app.use(attachIP)
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
+  app.use('/uploads', express.static('uploads'));
   app.use(xssProtection)
   app.use(hppProtection)
   app.use(mongoSanitization)
   app.use(sanitizeBody)
   app.use(morgan('dev'))
+  app.use(passport.initialize());
+  app.use(maintenanceMiddleware)
 
-  app.use('/api/documents', documentRoutes);
-  app.use('/uploads', express.static('uploads'));
-  app.use('/api/audit', auditRoutes);
+  app.use(`${config.API_PREFIX}/auth`, authRoutes);
+  app.use(`${config.API_PREFIX}/documents`, documentRoutes);
+  app.use(`${config.API_PREFIX}/audit`, auditRoutes);
+  app.use(`${config.API_PREFIX}/mail`, mailRoutes);
+  app.use(`${config.API_PREFIX}/events`, calendarRoutes);
+  app.use(`${config.API_PREFIX}/maintenance`, maintenanceRoutes);
 
   if (config.NODE_ENV !== 'production') {
     app.use(
-      '/api/docs',
+      `${config.API_PREFIX}/docs`,
       swaggerUi.serve,
       swaggerUi.setup(swaggerSpec, {
         customSiteTitle: 'Legal App API Docs',
@@ -55,11 +68,11 @@ export function createApp({ globalLimiter, authLimiter }: AppLimiters): Applicat
       })
     )
 
-    app.get('/api/docs-json', (req, res) => {
+    app.get(`${config.API_PREFIX}/docs-json`, (req, res) => {
       res.setHeader('Content-Type', 'application/json')
       res.send(swaggerSpec)
     })
-    console.log(`📚 Swagger docs en http://localhost:${config.PORT}/api/docs`)
+    console.log(`📚 Swagger docs en http://${config.HOST}:${config.PORT}${config.API_PREFIX}/docs`)
   }
 
 return app

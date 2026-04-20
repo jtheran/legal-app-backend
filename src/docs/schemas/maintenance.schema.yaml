@@ -1,0 +1,290 @@
+MaintenanceInactive:
+  type: object
+  properties:
+    active:
+      type: boolean
+      example: false
+    message:
+      type: string
+      example: Plataforma operativa
+
+MaintenanceActive:
+  type: object
+  properties:
+    active:
+      type: boolean
+      example: true
+    message:
+      type: string
+      example: La plataforma está en mantenimiento. Volveremos pronto.
+    estimatedEnd:
+      type: string
+      format: date-time
+      nullable: true
+      example: "2024-01-15T12:00:00.000Z"
+    startedAt:
+      type: string
+      format: date-time
+      example: "2024-01-15T11:30:00.000Z"
+    startedBy:
+      type: string
+      format: email
+      example: admin@legal.com
+
+EnableMaintenanceRequest:
+  type: object
+  required:
+    - message
+  properties:
+    message:
+      type: string
+      minLength: 10
+      maxLength: 500
+      example: Estamos realizando mejoras en la plataforma. Volveremos en 30 minutos.
+    estimatedEnd:
+      type: string
+      format: date-time
+      nullable: true
+      description: Fecha y hora estimada de fin del mantenimiento en formato ISO 8601
+      example: "2024-01-15T12:00:00.000Z"
+
+StatsResponse:
+  type: object
+  properties:
+    timestamp:
+      type: string
+      format: date-time
+      example: "2024-01-15T10:30:00.000Z"
+    platform:
+      $ref: '#/components/schemas/PlatformStats'
+    system:
+      $ref: '#/components/schemas/SystemStats'
+
+PlatformStats:
+  type: object
+  properties:
+    users:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 45
+        active:
+          type: integer
+          example: 40
+        newToday:
+          type: integer
+          example: 2
+        newThisMonth:
+          type: integer
+          example: 12
+    events:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 120
+        createdToday:
+          type: integer
+          example: 5
+        thisWeek:
+          type: integer
+          example: 18
+        upcoming:
+          type: integer
+          example: 30
+        cancelled:
+          type: integer
+          example: 8
+    notifications:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 340
+        unread:
+          type: integer
+          example: 12
+        sentToday:
+          type: integer
+          example: 25
+    documents:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 89
+        uploadedToday:
+          type: integer
+          example: 5
+        uploadedThisMonth:
+          type: integer
+          example: 34
+    emails:
+      type: object
+      properties:
+        queued:
+          type: integer
+          example: 3
+        sentToday:
+          type: integer
+          example: 27
+
+SystemStats:
+  type: object
+  properties:
+    cpu:
+      $ref: '#/components/schemas/CpuStats'
+    memory:
+      $ref: '#/components/schemas/MemoryStats'
+    disk:
+      type: array
+      items:
+        $ref: '#/components/schemas/DiskStats'
+    network:
+      type: array
+      items:
+        $ref: '#/components/schemas/NetworkStats'
+    processes:
+      $ref: '#/components/schemas/ProcessStats'
+    uptime:
+      $ref: '#/components/schemas/UptimeStats'
+
+CpuStats:
+  type: object
+  properties:
+    usage:
+      type: number
+      format: float
+      description: Porcentaje de uso total del CPU
+      example: 23.5
+    userLoad:
+      type: number
+      format: float
+      example: 15.2
+    systemLoad:
+      type: number
+      format: float
+      example: 8.3
+    cores:
+      type: integer
+      example: 8
+    model:
+      type: string
+      example: Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
+    temperature:
+      type: number
+      format: float
+      nullable: true
+      description: Temperatura en grados Celsius. Null si no está disponible.
+      example: 52.3
+
+MemoryStats:
+  type: object
+  properties:
+    total:
+      type: string
+      example: 16 GB
+    used:
+      type: string
+      example: 8.2 GB
+    free:
+      type: string
+      example: 7.8 GB
+    usagePercent:
+      type: number
+      format: float
+      example: 51.25
+    swap:
+      type: object
+      properties:
+        total:
+          type: string
+          example: 4 GB
+        used:
+          type: string
+          example: 512 MB
+
+DiskStats:
+  type: object
+  properties:
+    mount:
+      type: string
+      example: C:/
+    type:
+      type: string
+      example: NTFS
+    total:
+      type: string
+      example: 500 GB
+    used:
+      type: string
+      example: 210 GB
+    free:
+      type: string
+      example: 290 GB
+    usagePercent:
+      type: number
+      format: float
+      example: 42.0
+
+NetworkStats:
+  type: object
+  properties:
+    interface:
+      type: string
+      example: eth0
+    rxSec:
+      type: string
+      description: Datos recibidos por segundo
+      example: 1.2 MB/s
+    txSec:
+      type: string
+      description: Datos enviados por segundo
+      example: 0.8 MB/s
+    rxTotal:
+      type: string
+      description: Total de datos recibidos desde el arranque
+      example: 4.5 GB
+    txTotal:
+      type: string
+      description: Total de datos enviados desde el arranque
+      example: 2.1 GB
+
+ProcessStats:
+  type: object
+  properties:
+    total:
+      type: integer
+      example: 182
+    running:
+      type: integer
+      example: 4
+    blocked:
+      type: integer
+      example: 0
+    sleeping:
+      type: integer
+      example: 178
+
+UptimeStats:
+  type: object
+  properties:
+    seconds:
+      type: integer
+      example: 187812
+    formatted:
+      type: string
+      example: 2d 4h 10m 12s
+    nodeVersion:
+      type: string
+      example: v20.11.0
+    platform:
+      type: string
+      example: win32
+    arch:
+      type: string
+      example: x64
+    hostname:
+      type: string
+      example: LEGAL-SERVER-01
