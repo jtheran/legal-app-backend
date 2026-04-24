@@ -52,6 +52,7 @@ export const processDocumentFromS3 = async (fileKey: string, fileName: string, c
             name: fileName,
             url: fileKey,
             caseId: caseId,
+            userId,
             type: fileExtension,
             size: fileBuffer.length,
             

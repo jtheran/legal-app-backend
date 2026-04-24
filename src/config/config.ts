@@ -39,6 +39,7 @@ const config = {
     EMAIL_PASSWORD: process.env.EMAIL_PASSWORD || "",
     EMAIL_FROM: process.env.EMAIL_FROM || "",
     EMAIL_ENCRYPTION: Boolean(process.env.EMAIL_ENCRYPTION) || false,
+    SCRAPPER_JUDITIAL_URL: process.env.SCRAPPER_JUDITIAL_URL || "",
 }
 
 export default config;

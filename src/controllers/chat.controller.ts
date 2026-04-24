@@ -10,7 +10,7 @@ export const handleChatQuery = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "El mensaje es obligatorio" });
         }
 
-        const result = await getChatResponse(message, user.id, caseId);
+        const result = await getChatResponse(message, user.id);
 
         res.json(result);
     } catch (error) {

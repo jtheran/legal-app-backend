@@ -76,23 +76,35 @@
       404:
         $ref: '#/components/responses/NotFound'
 
-/auth/logout:
-  get:
+/auth/refresh-token:
+  post:
     tags: [Auth]
-    summary: Cerrar sesión
-    description: Invalida la sesión eliminando el registro en Redis.
-    security:
-      - bearerAuth: []
+    summary: Refrescar Access Token vía Redis
+    description: >
+      Verifica el Refresh Token enviado (vía cookie o body) contra la sesión activa en Redis.
+      Si es válido, genera un nuevo par de tokens y actualiza Redis.
     responses:
       200:
-        description: Sesión cerrada exitosamente
+        description: Tokens actualizados
         content:
           application/json:
             schema:
               type: object
               properties:
-                message:
+                accessToken:
                   type: string
-                  example: "Sesión cerrada exitosamente"
-      401:
-        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Sesión expirada o token revocado
+
+/auth/logout:
+  post:
+    tags: [Auth]
+    summary: Cerrar sesión
+    description: >
+      Elimina las llaves de acceso y refresco del usuario en Redis, 
+      invalidando cualquier token existente inmediatamente.
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Sesión eliminada de Redis y cookies limpias

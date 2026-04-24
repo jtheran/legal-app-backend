@@ -40,6 +40,7 @@ export class NotificationService {
       const io = getIO()
       io.to(`user:${data.userId}`).emit('notification:new', notification)
     } catch {
+      
       // Socket no disponible — la notificación igual queda en BD
     }
 
@@ -81,5 +82,7 @@ export class NotificationService {
     })
   }
 }
+
+
 
 export const notificationService = new NotificationService()

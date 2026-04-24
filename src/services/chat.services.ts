@@ -18,7 +18,7 @@ export const getChatResponse = async (query: string, userId: string, caseId?: st
 
     const searchFilter: any = {
         must: [
-            { key: 'lawyerId', match: { value: userId } }
+            { key: 'userId', match: { value: userId } }
         ]
     };
 

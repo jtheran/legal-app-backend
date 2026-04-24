@@ -41,6 +41,7 @@ model User {
   cases     Case[]
   events    CalendarEvent[]
   notifications Notification[]
+  documents Document[]
   createdAt DateTime @default(now())
 }
 
@@ -112,6 +113,8 @@ model Document {
   vectorId  String?  // Referencia en Qdrant para el RAG
   case      Case     @relation(fields: [caseId], references: [id])
   caseId    String
+  lawyer    User     @relation(fields: [userId], references: [id])
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
