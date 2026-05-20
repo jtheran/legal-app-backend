@@ -36,7 +36,7 @@ async function startServer() {
         📂 Archivos: MinIO activo
         🧠 IA: Compatible con LM Studio y modelo ${config.AI_MODEL}
         📚 Docs: Activa
-        📧 Email: ${config.EMAIL_FROM}
+        📧 Email: ${config.EMAIL_USER}
         📅 Eventos: Activos
         🔌 WebSocket: Activo
         ⏰ Workers: Activos
