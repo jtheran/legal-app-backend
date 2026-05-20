@@ -2,8 +2,8 @@ import { OpenAI } from 'openai';
 import config from './config';
 
 const aiClient = new OpenAI({
-    baseURL: config.LMSTUDIO_URL,
-    apiKey: config.LMSTUDIO_API_KEY,
+    baseURL: config.AI_BASE_URL,
+    apiKey: config.AI_TOKEN,
 });
 
 export default aiClient;

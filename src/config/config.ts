@@ -15,6 +15,8 @@ const config = {
     LMSTUDIO_API_KEY: process.env.LMSTUDIO_API_KEY || "",
     AI_MODEL: process.env.AI_MODEL || "",
     AI_MODEL_EMBEDDING: process.env.AI_MODEL_EMBEDDING || "",
+    AI_TOKEN: process.env.AI_TOKEN || "",
+    AI_BASE_URL: process.env.AI_BASE_URL || "",
     PROMT_SYSTEM: process.env.PROMT_SYSTEM || "",
     QDRANT_URL: process.env.QDRANT_URL || "",
     QDRANT_API_KEY: process.env.QDRANT_API_KEY || "",
