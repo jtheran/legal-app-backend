@@ -14,11 +14,10 @@ async function startServer() {
   try {
     console.log('🔍 Verificando infraestructura...');
     await connectRedis();
-    await runMigrations();
     await checkInfrastructure();
-    await runSeed();
     await initQdrantCollection();
-
+    await runMigrations();
+    await runSeed();
     const { globalLimiter, authLimiter } = createLimiters(redisClient)
 
     const app = createApp({ globalLimiter, authLimiter })
@@ -34,8 +33,9 @@ async function startServer() {
         📍 Host: ${config.HOST}
         📍 Api Prefix: ${config.API_PREFIX}
         📂 Archivos: MinIO activo
-        🧠 IA: Compatible con LM Studio y modelo ${config.AI_MODEL}
-        📚 Docs: Activa
+        🧠 IA: Compatible Nvidia Model ${config.AI_MODEL}
+        📚 Docs: Qdrant Colección 
+        📚 Docs: Swagger Activa
         📧 Email: ${config.EMAIL_USER}
         📅 Eventos: Activos
         🔌 WebSocket: Activo
@@ -45,8 +45,6 @@ async function startServer() {
         --------------------------------
       `);
     });
-
-    console.log('✅ Qdrant: Colección verificada.')
 
   } catch (error) {
     console.error('❌ Error crítico al iniciar el servidor:', error);

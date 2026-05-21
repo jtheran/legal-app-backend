@@ -1,0 +1,89 @@
+CreateEventRequest:
+  type: object
+  required:
+    - title
+    - startDate
+    - endDate
+  properties:
+    title:
+      type: string
+      description: Título descriptivo o asunto de la cita
+      example: "Audiencia Pública de Conciliación - Caso Juan Pérez"
+    description:
+      type: string
+      description: Notas adicionales, enlace de videollamada o detalles procesales
+      example: "Virtual a través de Teams. Llevar minuta de acuerdo firmada."
+    startDate:
+      type: string
+      format: date-time
+      description: Fecha y hora de inicio en formato ISO 8601
+      example: "2026-05-25T09:00:00.000Z"
+    endDate:
+      type: string
+      format: date-time
+      description: Fecha y hora de finalización en formato ISO 8601
+      example: "2026-05-25T11:00:00.000Z"
+    caseId:
+      type: string
+      description: ID del caso legal asociado en el sistema (opcional)
+      example: "clw12345abcde67890"
+
+UpdateEventRequest:
+  type: object
+  description: Todas las propiedades de creación son opcionales en el payload de actualización parcial/completa
+  properties:
+    title:
+      type: string
+      example: "Audiencia Reprogramada de Conciliación"
+    description:
+      type: string
+      example: "Se cambió de sala virtual."
+    startDate:
+      type: string
+      format: date-time
+      example: "2026-05-26T14:30:00.000Z"
+    endDate:
+      type: string
+      format: date-time
+      example: "2026-05-26T16:00:00.000Z"
+
+EventResponse:
+  type: object
+  properties:
+    id:
+      type: string
+      example: "evt_349820572"
+    title:
+      type: string
+      example: "Audiencia Pública de Conciliación - Caso Juan Pérez"
+    description:
+      type: string
+      example: "Virtual a través de Teams. Llevar minuta de acuerdo firmada."
+    startDate:
+      type: string
+      format: date-time
+      example: "2026-05-25T09:00:00.000Z"
+    endDate:
+      type: string
+      format: date-time
+      example: "2026-05-25T11:00:00.000Z"
+    status:
+      type: string
+      enum: [CONFIRMED, PENDING, CANCELLED]
+      example: "CONFIRMED"
+    userId:
+      type: string
+      description: Dueño o abogado asignado al evento
+      example: "08dd7796-1c49-4b83-9434-17af4beb8161"
+    caseId:
+      type: string
+      nullable: true
+      example: "clw12345abcde67890"
+    createdAt:
+      type: string
+      format: date-time
+      example: "2026-05-20T21:07:48.000Z"
+    updatedAt:
+      type: string
+      format: date-time
+      example: "2026-05-20T21:30:12.000Z"

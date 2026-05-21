@@ -1,0 +1,30 @@
+ChatQueryRequest:
+  type: object
+  required:
+    - message
+  properties:
+    message:
+      type: string
+      description: Pregunta, inquietud o instrucción legal que se le plantea al bot.
+      example: "¿Cuáles son los términos de vencimiento para contestar la demanda del expediente EXP-2026?"
+    caseId:
+      type: string
+      format: uuid
+      description: ID opcional de un caso para contextualizar o limitar el análisis de la IA a ese expediente.
+      example: "bc381a17-3bfb-426b-80ff-27fb6fb89123"
+
+ChatQueryResponse:
+  type: object
+  properties:
+    response:
+      type: string
+      description: Texto enriquecido o markdown devuelto por el asistente con la respuesta legal detallada.
+      example: "De acuerdo con el Artículo 96 del Código General del Proceso, el término común para contestar la demanda es de veinte (20) días..."
+    tokensUsed:
+      type: integer
+      description: Métrica interna opcional del consumo del modelo de lenguaje.
+      example: 245
+    createdAt:
+      type: string
+      format: date-time
+      example: "2026-05-20T23:55:10.000Z"

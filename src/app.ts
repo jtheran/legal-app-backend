@@ -16,6 +16,8 @@ import mailRoutes from './routes/mail.routes';
 import calendarRoutes from './routes/calendar.routes';
 import maintenanceRoutes from './routes/maintenance.routes';
 import authRoutes from './routes/auth.routes';
+import chatRoutes from './routes/chat.routes';
+import caseRoutes from './routes/case.routes';
 
 
 interface AppLimiters {
@@ -48,6 +50,9 @@ export function createApp({ globalLimiter, authLimiter }: AppLimiters): Applicat
   app.use(`${config.API_PREFIX}/mail`, mailRoutes);
   app.use(`${config.API_PREFIX}/events`, calendarRoutes);
   app.use(`${config.API_PREFIX}/maintenance`, maintenanceRoutes);
+  app.use(`${config.API_PREFIX}/chat`, chatRoutes);
+  app.use(`${config.API_PREFIX}/cases`, caseRoutes);
+
 
   if (config.NODE_ENV !== 'production') {
     app.use(

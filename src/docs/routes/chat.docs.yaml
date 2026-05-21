@@ -1,0 +1,45 @@
+/chat/query:
+  post:
+    tags: [Chatbot]
+    summary: Consultar al asistente legal de IA
+    description: >
+      Envía una consulta o pregunta en lenguaje natural al bot inteligente. 
+      El sistema procesa el mensaje bajo el contexto del usuario autenticado (y opcionalmente un caso) 
+      para devolver respuestas e interpretaciones legales automatizadas.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ChatQueryRequest'
+    responses:
+      200:
+        description: Consulta procesada de forma exitosa por el modelo de IA.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatQueryResponse'
+      400:
+        description: Solicitud incorrecta - El mensaje de consulta viene vacío u omitido.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "El mensaje es obligatorio"
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      500:
+        description: Error crítico al conectar con el motor de IA o procesar el prompt.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error al procesar la consulta legal"

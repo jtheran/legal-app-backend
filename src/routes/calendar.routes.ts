@@ -9,11 +9,11 @@ const router = Router()
 
 router.use(isAuth) // todas las rutas requieren auth
 
-router.post('/',              createEvent)
-router.get('/',               getEvents)
-router.get('/:id',            getEvent)
-router.put('/:id',            updateEvent)
-router.delete('/:id',         deleteEvent)
-router.patch('/:id/cancel',   cancelEvent)
+router.post('/', createEvent)
+router.get('/', getEvents)
+router.get('/:id', getEvent)
+router.put('/:id',  updateEvent)
+router.delete('/:id', deleteEvent)
+router.patch('/:id/cancel', cancelEvent)
 
 export default router

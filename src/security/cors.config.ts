@@ -7,7 +7,7 @@ const allowedOrigins = config.NODE_ENV === 'production'
       'https://app.tuapp.com',
     ]
   : [
-      'http://localhost:3000',
+      'http://localhost:4589',
       'http://localhost:4568',
     ]
 

@@ -16,11 +16,36 @@ LoginRequest:
 LoginResponse:
   type: object
   properties:
-    token:
+    accessToken:
+      type: string
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    refreshToken:
       type: string
       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     user:
       $ref: '#/components/schemas/UserProfile'
+
+RefreshTokenRequest:
+  type: object
+  required:
+    - refreshToken
+  properties:
+    refreshToken:
+      type: string
+      description: "El token de refresco actual emitido durante el inicio de sesión o la última renovación"
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzE1..."
+
+RefreshTokenResponse:
+  type: object
+  properties:
+    accessToken:
+      type: string
+      description: "El nuevo token de acceso de corta duración para autenticar las peticiones HTTP"
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzE1..."
+    refreshToken:
+      type: string
+      description: "El nuevo token de refresco generado (rotado) para la siguiente renovación"
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzE1..."
 
 RegisterRequest:
   type: object

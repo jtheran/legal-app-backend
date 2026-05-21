@@ -1,0 +1,228 @@
+/cases:
+  post:
+    tags: [Cases]
+    summary: Crear un nuevo caso judicial
+    description: Registra un expediente en la plataforma asociándolo a un cliente, un abogado y opcionalmente a un juzgado.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateCaseRequest'
+    responses:
+      201:
+        description: Caso creado exitosamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Caso creado exitosamente"
+                data:
+                  $ref: '#/components/schemas/FullCaseResponse'
+      400:
+        description: Datos inválidos. El número de expediente ya existe o no cumple las reglas de validación de Zod.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZodValidationError'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      500:
+        $ref: '#/components/responses/InternalError'
+
+  get:
+    tags: [Cases]
+    summary: Listar casos judiciales
+    description: Obtiene el listado general de expedientes cargados. Permite filtrar dinámicamente por estado o por el ID del abogado asignado.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: status
+        in: query
+        required: false
+        description: Filtrar por estado procesal del caso
+        schema:
+          type: string
+          enum: [OPEN, IN_PROGRESS, CLOSED, ARCHIVED]
+          example: "OPEN"
+      - name: userId
+        in: query
+        required: false
+        description: Filtrar por el ID único del abogado asignado (UUID)
+        schema:
+          type: string
+          format: uuid
+          example: "08dd7796-1c49-4b83-9434-17af4beb8161"
+    responses:
+      200:
+        description: Listado de casos obtenido exitosamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CompactCaseResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      500:
+        $ref: '#/components/responses/InternalError'
+
+/cases/{id}:
+  get:
+    tags: [Cases]
+    summary: Obtener el detalle completo de un caso
+    description: Devuelve toda la información del expediente, incluyendo la información del cliente, juzgado, abogado y el listado de documentos adjuntos.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del caso (UUID)
+        schema:
+          type: string
+          format: uuid
+          example: "bc381a17-3bfb-426b-80ff-27fb6fb89123"
+    responses:
+      200:
+        description: Detalles del expediente localizados.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/FullCaseResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      404:
+        description: El caso judicial no fue encontrado.
+      500:
+        $ref: '#/components/responses/InternalError'
+
+  put:
+    tags: [Cases]
+    summary: Actualizar datos generales del caso
+    description: Modifica los parámetros editables de un caso. **Nota:** El número de expediente (`folderNumber`) no se puede modificar por esta ruta.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del caso a mutar
+        schema:
+          type: string
+          format: uuid
+          example: "bc381a17-3bfb-426b-80ff-27fb6fb89123"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateCaseRequest'
+    responses:
+      200:
+        description: Caso actualizado correctamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Caso actualizado de forma parcial"
+                data:
+                  $ref: '#/components/schemas/CaseBaseSchema'
+      400:
+        description: Datos inválidos enviados en el body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZodValidationError'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      404:
+        description: El caso solicitado no existe.
+
+/cases/{id}/status:
+  patch:
+    tags: [Cases]
+    summary: Cambiar el estado procesal del caso
+    description: Actualiza de forma atómica y aislada el estado del expediente (`OPEN`, `IN_PROGRESS`, `CLOSED`, `ARCHIVED`).
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del caso
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateCaseStatusRequest'
+    responses:
+      200:
+        description: Estado cambiado exitosamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Estado del caso cambiado a IN_PROGRESS"
+                data:
+                  $ref: '#/components/schemas/CaseBaseSchema'
+      400:
+        description: El estado enviado no es válido o está vacío.
+
+/cases/{id}/assign-court:
+  patch:
+    tags: [Cases]
+    summary: Asignar o reubicar el caso en un juzgado
+    description: Vincula el expediente a un despacho o juzgado específico validando previamente la existencia de este en el sistema.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del caso
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AssignCourtRequest'
+    responses:
+      200:
+        description: Juzgado asignado correctamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Juzgado asignado correctamente al caso"
+                data:
+                  $ref: '#/components/schemas/CaseBaseSchema'
+      400:
+        description: El ID de juzgado ingresado no es un UUID válido o no existe.

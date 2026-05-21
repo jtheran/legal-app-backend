@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: legal_db
     ports:
-      - "5432:5432"
+      - "1488:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -19,7 +19,7 @@ services:
     container_name: legal-redis
     restart: always
     ports:
-      - "6379:6379"
+      - "1489:6379"
     command: redis-server --requirepass zaqwer --appendonly yes
     volumes:
       - redis_data:/data
@@ -30,8 +30,8 @@ services:
     container_name: legal-qdrant
     restart: always
     ports:
-      - "6333:6333"
-      - "6334:6334"
+      - "1487:6333"
+      - "1484:6334"
     volumes:
       - qdrant_data:/qdrant/storage
 
@@ -41,8 +41,8 @@ services:
     container_name: legal-minio
     restart: always
     ports:
-      - "9000:9000"    # API
-      - "9001:9001"    # Consola Web
+      - "1482:9000"    # API
+      - "1481:9001"    # Consola Web
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: password123

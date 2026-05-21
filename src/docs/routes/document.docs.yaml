@@ -1,0 +1,52 @@
+/document/upload/{caseId}:
+  post:
+    tags: [Document]
+    summary: Subir documento a un caso
+    description: >
+      Carga un archivo físico mediante multipart/form-data, lo procesa para almacenarlo 
+      en el storage S3/MinIO asociado al número de radicado del caso, y registra la acción en la auditoría.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: caseId
+        in: path
+        required: true
+        description: Identificador único del caso legal en la base de datos
+        schema:
+          type: string
+          example: "clw12345abcde67890"
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/UploadDocumentRequest'
+    responses:
+      201:
+        description: Documento subido y procesado exitosamente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentResponse'
+      400:
+        description: Solicitud incorrecta - No se adjuntó ningún archivo
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "No se subió archivo"
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      500:
+        description: Error interno al procesar o almacenar el archivo en MinIO
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error al subir a MinIO"

@@ -1,0 +1,210 @@
+# Esquema base compartido para evitar duplicar código de propiedades nativas
+CaseBaseSchema:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: "bc381a17-3bfb-426b-80ff-27fb6fb89123"
+    folderNumber:
+      type: string
+      example: "EXP-2026-0045/A"
+    title:
+      type: string
+      example: "Proceso Ejecutivo por Obligación de Dar"
+    description:
+      type: string
+      nullable: true
+      example: "Cobro coactivo de cartera vencida de la vigencia fiscal anterior."
+    status:
+      type: string
+      enum: [OPEN, IN_PROGRESS, CLOSED, ARCHIVED]
+      example: "OPEN"
+    clientId:
+      type: string
+      format: uuid
+      example: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+    userId:
+      type: string
+      format: uuid
+      example: "08dd7796-1c49-4b83-9434-17af4beb8161"
+    courtId:
+      type: string
+      format: uuid
+      nullable: true
+      example: "f3e2d1c0-b9a8-7766-5544-33221100aabb"
+    createdAt:
+      type: string
+      format: date-time
+      example: "2026-05-20T22:15:00.000Z"
+    updatedAt:
+      type: string
+      format: date-time
+      example: "2026-05-20T22:30:15.000Z"
+
+# Requests (Payloads)
+CreateCaseRequest:
+  type: object
+  required:
+    - title
+    - folderNumber
+    - clientId
+    - userId
+  properties:
+    title:
+      type: string
+      minLength: 5
+      maxLength: 200
+      example: "Proceso Ejecutivo por Obligación de Dar"
+    description:
+      type: string
+      maxLength: 2000
+      example: "Cobro coactivo de cartera vencida de la vigencia fiscal anterior."
+    folderNumber:
+      type: string
+      minLength: 1
+      maxLength: 50
+      description: "Solo permite caracteres alfanuméricos, guiones y barras"
+      example: "EXP-2026-0045/A"
+    clientId:
+      type: string
+      format: uuid
+      example: "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+    courtId:
+      type: string
+      format: uuid
+      example: "f3e2d1c0-b9a8-7766-5544-33221100aabb"
+    userId:
+      type: string
+      format: uuid
+      example: "08dd7796-1c49-4b83-9434-17af4beb8161"
+    status:
+      type: string
+      enum: [OPEN, IN_PROGRESS, CLOSED, ARCHIVED]
+      default: "OPEN"
+
+UpdateCaseRequest:
+  type: object
+  description: Payload parcial. Mismos campos de creación pero opcionales. folderNumber es ignorado por Zod si se envía.
+  properties:
+    title:
+      type: string
+      example: "Proceso Ejecutivo Actualizado"
+    description:
+      type: string
+      example: "Anotaciones adicionales del despacho."
+    clientId:
+      type: string
+      format: uuid
+    courtId:
+      type: string
+      format: uuid
+    userId:
+      type: string
+      format: uuid
+
+UpdateCaseStatusRequest:
+  type: object
+  required:
+    - status
+  properties:
+    status:
+      type: string
+      enum: [OPEN, IN_PROGRESS, CLOSED, ARCHIVED]
+      example: "IN_PROGRESS"
+
+AssignCourtRequest:
+  type: object
+  required:
+    - courtId
+  properties:
+    courtId:
+      type: string
+      format: uuid
+      example: "f3e2d1c0-b9a8-7766-5544-33221100aabb"
+
+# Responses extendidas (Con relaciones de Prisma)
+CompactCaseResponse:
+  allOf:
+    - $ref: '#/components/schemas/CaseBaseSchema'
+    - type: object
+      properties:
+        client:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "Inversiones Ingecol S.A.S."
+        court:
+          type: object
+          nullable: true
+          properties:
+            name:
+              type: string
+              example: "Juzgado 03 Civil del Circuito"
+
+FullCaseResponse:
+  allOf:
+    - $ref: '#/components/schemas/CaseBaseSchema'
+    - type: object
+      properties:
+        client:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              example: "Inversiones Ingecol S.A.S."
+        lawyer:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              example: "Dr. Alejandro Restrepo"
+            email:
+              type: string
+              example: "abogado@ingecol.com"
+        court:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              example: "Juzgado 03 Civil del Circuito"
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+                example: "Demanda_Inicial_Firmada.pdf"
+
+# Estructura del Error devuelto por tu middleware Validate (ZodError)
+ZodValidationError:
+  type: object
+  properties:
+    message:
+      type: string
+      example: "Datos inválidos"
+    errors:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+            example: "folderNumber"
+          message:
+            type: string
+            example: "El número de expediente solo puede contener letras, números, guiones y barras"

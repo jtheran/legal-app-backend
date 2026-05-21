@@ -83,16 +83,19 @@
     description: >
       Verifica el Refresh Token enviado (vía cookie o body) contra la sesión activa en Redis.
       Si es válido, genera un nuevo par de tokens y actualiza Redis.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefreshTokenRequest'
     responses:
       200:
         description: Tokens actualizados
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                accessToken:
-                  type: string
+              $ref: '#/components/schemas/RefreshTokenResponse'
       403:
         description: Sesión expirada o token revocado
 

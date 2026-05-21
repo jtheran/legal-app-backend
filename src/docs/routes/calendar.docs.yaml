@@ -1,0 +1,214 @@
+/events:
+  post:
+    tags: [Calendar]
+    summary: Crear evento en el calendario
+    description: Registra una nueva audiencia, reunión o hito procesal asociado al abogado autenticado.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateEventRequest'
+    responses:
+      201:
+        description: Evento registrado exitosamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Evento creado"
+                data:
+                  $ref: '#/components/schemas/EventResponse'
+      400:
+        description: Datos inválidos o lógicamente erróneos (ej. fecha de fin menor a fecha de inicio).
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      500:
+        $ref: '#/components/responses/InternalError'
+
+  get:
+    tags: [Calendar]
+    summary: Listar eventos del abogado
+    description: Obtiene los eventos programados del usuario logueado. Permite filtrar por un rango de fechas específico.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: from
+        in: query
+        required: false
+        description: Fecha inicial para filtrar el rango (ISO 8601)
+        schema:
+          type: string
+          format: date-time
+          example: "2026-05-01T00:00:00.000Z"
+      - name: to
+        in: query
+        required: false
+        description: Fecha final para filtrar el rango (ISO 8601)
+        schema:
+          type: string
+          format: date-time
+          example: "2026-05-31T23:59:59.999Z"
+    responses:
+      200:
+        description: Listado de eventos obtenido.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/EventResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      500:
+        $ref: '#/components/responses/InternalError'
+
+/events/{id}:
+  get:
+    tags: [Calendar]
+    summary: Obtener detalle de un evento
+    description: Recupera la información de un evento específico por su ID único, validando la propiedad o acceso del abogado.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del evento en el calendario
+        schema:
+          type: string
+          example: "evt_349820572"
+    responses:
+      200:
+        description: Evento localizado.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/EventResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      404:
+        description: El evento no existe o el usuario no posee permisos para visualizarlo.
+      500:
+        $ref: '#/components/responses/InternalError'
+
+  put:
+    tags: [Calendar]
+    summary: Actualizar evento de forma completa
+    description: Modifica los parámetros editables de una cita o hito procesal. Las fechas enviadas se parsean a formato Date.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del evento a actualizar
+        schema:
+          type: string
+          example: "evt_349820572"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateEventRequest'
+    responses:
+      200:
+        description: Evento actualizado con éxito.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Evento actualizado"
+                data:
+                  $ref: '#/components/schemas/EventResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      404:
+        description: Evento no encontrado o sin permisos de edición.
+      500:
+        $ref: '#/components/responses/InternalError'
+
+  delete:
+    tags: [Calendar]
+    summary: Eliminar permanentemente un evento
+    description: Borra el registro del evento de forma física o lógica en la base de datos según las políticas de retención.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del evento a eliminar
+        schema:
+          type: string
+          example: "evt_349820572"
+    responses:
+      200:
+        description: Evento eliminado. Suelen enviarse los detalles de la operación o un booleano.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "El evento fue removido"
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      404:
+        description: Evento no hallado.
+      500:
+        $ref: '#/components/responses/InternalError'
+
+/events/{id}/cancel:
+  patch:
+    tags: [Calendar]
+    summary: Cancelar un evento programado
+    description: Cambia únicamente el estatus del evento a 'CANCELLED' sin eliminar la traza ni el histórico de la agenda.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID único del evento a cancelar
+        schema:
+          type: string
+          example: "evt_349820572"
+    responses:
+      200:
+        description: Evento cancelado satisfactoriamente.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Evento cancelado"
+                data:
+                  $ref: '#/components/schemas/EventResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      404:
+        description: Evento no encontrado.
+      500:
+        $ref: '#/components/responses/InternalError'

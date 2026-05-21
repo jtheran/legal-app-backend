@@ -1,0 +1,40 @@
+UploadDocumentRequest:
+  type: object
+  required:
+    - file
+    - radicado
+  properties:
+    file:
+      type: string
+      format: binary
+      description: Archivo físico a subir (PDF, Word, Excel, etc.)
+    radicado:
+      type: string
+      description: Código o número de radicado oficial del caso judicial
+      example: "11001400302320260012500"
+
+DocumentResponse:
+  type: object
+  properties:
+    id:
+      type: string
+      example: "doc_98765fedcba"
+    name:
+      type: string
+      description: Nombre original del archivo subido
+      example: "Memorial_Sustentacion_Apelacion.pdf"
+    key:
+      type: string
+      description: Identificador único o ruta del objeto dentro del bucket de MinIO/S3
+      example: "radicados/11001400302320260012500/1715800000_Memorial.pdf"
+    caseId:
+      type: string
+      example: "clw12345abcde67890"
+    uploadedBy:
+      type: string
+      description: ID del usuario (abogado) que realizó la carga
+      example: "usr_lwy45678"
+    createdAt:
+      type: string
+      format: date-time
+      example: "2026-05-20T23:12:54.000Z"

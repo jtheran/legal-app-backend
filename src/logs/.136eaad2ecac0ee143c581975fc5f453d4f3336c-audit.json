@@ -6,9 +6,9 @@
     "auditLog": "D:\\PROYECTOS-PERSONALES\\legal-app-backend\\src\\logs\\.136eaad2ecac0ee143c581975fc5f453d4f3336c-audit.json",
     "files": [
         {
-            "date": 1776655444550,
-            "name": "D:\\PROYECTOS-PERSONALES\\legal-app-backend\\src\\logs\\error-2026-04-19.log",
-            "hash": "78b147bdc9536696550c651c5484b401bd91f4d79d157b70bfb6e076c6aa8872"
+            "date": 1779369525963,
+            "name": "D:\\PROYECTOS-PERSONALES\\legal-app-backend\\src\\logs\\error-2026-05-21.log",
+            "hash": "e70741967c376ce05c8146008588f254924475af152c7f189a9ea9f69c11e5c9"
         }
     ],
     "hashType": "sha256"
