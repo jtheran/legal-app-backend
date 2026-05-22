@@ -36,6 +36,7 @@ model User {
   password  String
   dni       String   @unique
   name      String
+  active    Boolean         @default(true)
   role      Role     @default(LAWYER)
   clients   Client[]
   cases     Case[]

@@ -7,67 +7,66 @@ import logger from '../config/logger';
 
 export const syncDatabaseToVectorStore = async () => {
     try {
-        // 1. Obtener datos de múltiples modelos
+        // 1. Obtener datos de Prisma
         const clients = await prisma.client.findMany({ include: { cases: true } });
         const cases = await prisma.case.findMany();
+        const allPoints: any[] = [];
 
-        const allPoints = [];
-        logger.info('Iniciando sincronización de modelos de base de datos a Qdrant...');
-        // --- PROCESAR CLIENTES ---
-        for (const client of clients) {
-            const clientText = `Registro de Cliente: ${client.name}. 
-                               DNI: ${client.dni}. 
-                               Contacto: ${client.email || 'N/A'}, Tel: ${client.phone || 'N/A'}. 
-                               Casos asociados: ${client.cases.length}.`;
-            
-            const vector = await generateEmbedding(clientText);
-            allPoints.push({
-                id: uuidv4(),
-                vector,
-                payload: {
-                    type: 'database_record',
-                    model: 'Client',
-                    recordId: client.id,
-                    text: clientText,
-                    lawyerId: client.userId, // Filtro de seguridad
-                    metadata: { dni: client.dni, email: client.email }
-                }
-            });
-            logger.info(`Cliente ${client.name} sincronizado`);
-        }
+        // --- MAPEAR PROMESAS PARA CLIENTES (Paralelismo) ---
+        const clientPromises = clients.map(async (client) => {
+          const clientText = `Registro de Cliente: ${client.name}. DNI: ${client.dni}. Contacto: ${client.email || 'N/A'}, Tel: ${client.phone || 'N/A'}. Casos asociados: ${client.cases.length}.`;
+          const vector = await generateEmbedding(clientText);
+          return {
+            id: uuidv4(),
+            vector,
+            payload: {
+              type: 'database_record',
+              model: 'Client',
+              recordId: client.id,
+              text: clientText,
+              lawyerId: client.userId,
+              metadata: { dni: client.dni, email: client.email }
+            }
+          };
+        });
 
-        // --- PROCESAR CASOS ---
-        for (const c of cases) {
-            const caseText = `Expediente Judicial: ${c.title}. 
-                             Descripción: ${c.description}. 
-                             Estado actual: ${c.status}.`;
-            
-            const vector = await generateEmbedding(caseText);
-            allPoints.push({
-                id: uuidv4(),
-                vector,
-                payload: {
-                    type: 'database_record',
-                    model: 'Case',
-                    recordId: c.id,
-                    text: caseText,
-                    lawyerId: c.userId,
-                    metadata: { status: c.status }
-                }
-            });
-            logger.info(`Caso ${c.title} sincronizado`);
-        }
+        // --- MAPEAR PROMESAS PARA CASOS ---
+        const casePromises = cases.map(async (c) => {
+          const caseText = `Expediente Judicial: ${c.title}. Descripción: ${c.description}. Estado actual: ${c.status}.`;
+          const vector = await generateEmbedding(caseText);
+          return {
+            id: uuidv4(),
+            vector,
+            payload: {
+              type: 'database_record',
+              model: 'Case',
+              recordId: c.id,
+              text: caseText,
+              lawyerId: c.userId,
+              metadata: { status: c.status }
+            }
+          };
+        });
 
-        // 2. Subida masiva a Qdrant (en lotes si son muchos)
+        // Resolver todas las llamadas de embeddings concurrentemente
+        const clientPoints = await Promise.all(clientPromises);
+        const casePoints = await Promise.all(casePromises);
+        
+        allPoints.push(...clientPoints, ...casePoints);
+
+        // 2. Subida masiva (Upsert) a Qdrant
         if (allPoints.length > 0) {
-            await qdrant.upsert(config.QDRANT_COLLECTION_NAME, {
-                wait: true,
-                points: allPoints
-            });
-            logger.info(`Sincronización completada: ${allPoints.length} registros indexados.`);
+          await qdrant.upsert(config.QDRANT_COLLECTION_NAME, {
+            wait: true,
+            points: allPoints
+          });
+          logger.info(`[Worker] Sincronización exitosa: ${allPoints.length} puntos vectorizados.`);
         }
 
-    } catch (error) {
-        logger.error('Error en sincronización:', error);
-    }
+        return { success: true, processed: allPoints.length };
+
+      } catch (error) {
+        logger.error('[Worker] Error en la ejecución de sincronización vector:', error);
+        throw error; // BullMQ marcará el job como fallido para reintentos
+      }
 };

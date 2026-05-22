@@ -1,0 +1,130 @@
+/users:
+  get:
+    tags: [Users]
+    summary: Listar todos los usuarios / abogados
+    description: Retorna una lista paginada de los usuarios registrados en el sistema. Acceso exclusivo para administradores.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
+    responses:
+      200:
+        description: Lista de usuarios obtenida con éxito
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserListResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - Requiere rol de ADMIN
+
+  post:
+    tags: [Users]
+    summary: Registrar un nuevo usuario (Abogado / Administrador)
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserCreateInput'
+    responses:
+      201:
+        description: Usuario creado exitosamente
+      400:
+        description: Datos inválidos o duplicados (DNI/Email ya registrados)
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+/users/{id}:
+  get:
+    tags: [Users]
+    summary: Obtener el detalle de un usuario específico
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Datos del usuario encontrados
+      404:
+        description: Usuario no encontrado
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+  put:
+    tags: [Users]
+    summary: Actualizar información de un usuario
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserUpdateInput'
+    responses:
+      200:
+        description: Usuario actualizado con éxito
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+/users/{id}/deactivate:
+  patch:
+    tags: [Users]
+    summary: Desactivar un usuario (Borrado Lógico)
+    description: >
+      Cambia el estado de disponibilidad del usuario a inactivo (`active: false`). 
+      Esto revoca su capacidad de login sin destruir sus relaciones históricas en la base de datos.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Usuario desactivado correctamente
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "El usuario Juan Pérez ha sido desactivado correctamente."
+      400:
+        description: Solicitud inválida (Ej. Intentar desactivarse a sí mismo)
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - Requiere rol de ADMIN

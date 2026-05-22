@@ -1,0 +1,95 @@
+/notifications:
+  get:
+    tags: [Notifications]
+    summary: Obtener las notificaciones del usuario autenticado
+    description: Retorna el listado de alertas de sistema, eventos de calendario próximos o actualizaciones de expedientes judiciales asignados.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
+      - name: unreadOnly
+        in: query
+        description: Si es true, filtra omitiendo las notificaciones que ya fueron leídas.
+        schema:
+          type: boolean
+          default: false
+    responses:
+      200:
+        description: Listado de notificaciones devuelto con éxito
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationListResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+/notifications/mark-all-read:
+  patch:
+    tags: [Notifications]
+    summary: Marcar todas las notificaciones pendientes como leídas
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Actualización masiva completada
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "Se marcaron 5 notificaciones como leídas."
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+/notifications/{id}:
+  patch:
+    tags: [Notifications]
+    summary: Marcar una notificación específica como leída
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Notificación actualizada
+      403:
+        description: Prohibido - Intentas modificar una alerta ajena
+      404:
+        description: La notificación no existe
+
+  delete:
+    tags: [Notifications]
+    summary: Descartar o eliminar una notificación
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Notificación removida correctamente
+      401:
+        $ref: '#/components/responses/Unauthorized'

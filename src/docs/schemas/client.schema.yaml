@@ -1,0 +1,88 @@
+components:
+  schemas:
+    ClientCreateInput:
+      type: object
+      required:
+        - name
+        - address
+        - dni
+        - phone
+        - email
+      properties:
+        name:
+          type: string
+          example: "Inversiones Ingecol S.A.S."
+        type:
+          type: string
+          enum: [NATURAL, JURIDICA]
+          default: NATURAL
+        companyName:
+          type: string
+          example: "Ingecol Plus"
+        address:
+          type: string
+          example: "Manga Callejón de los Besos Cra 24"
+        dni:
+          type: string
+          example: "NIT-901234567-1"
+        phone:
+          type: string
+          example: "+573001234567"
+        email:
+          type: string
+          format: email
+          example: "contacto@ingecol.com"
+        city:
+          type: string
+          default: "Cartagena"
+        state:
+          type: string
+          default: "Bolivar"
+        country:
+          type: string
+          default: "Colombia"
+
+    ClientUpdateInput:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        city:
+          type: string
+
+    ClientListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              type:
+                type: string
+              dni:
+                type: string
+              phone:
+                type: string
+              email:
+                type: string
+              city:
+                type: string
+              userId:
+                type: string
+                format: uuid
+                description: ID del abogado responsable asignado.

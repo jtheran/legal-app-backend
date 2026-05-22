@@ -1,6 +1,7 @@
 import { initQdrantCollection } from './config/qdrant';
 import { connectRedis, redisClient } from './config/redis';
 import { runSeed } from './seed/seed';
+import { startSyncScheduler } from './utils/programador';
 import { initSocket } from './config/socket';
 import { createServer } from 'http'
 import { checkInfrastructure } from './utils/healthCheck';
@@ -18,6 +19,7 @@ async function startServer() {
     await initQdrantCollection();
     await runMigrations();
     await runSeed();
+    startSyncScheduler();
     const { globalLimiter, authLimiter } = createLimiters(redisClient)
 
     const app = createApp({ globalLimiter, authLimiter })

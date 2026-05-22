@@ -1,0 +1,73 @@
+components:
+  schemas:
+    UserCreateInput:
+      type: object
+      required:
+        - email
+        - password
+        - dni
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+          example: "abogado.gonzalez@pyme.com"
+        password:
+          type: string
+          format: password
+          example: "ClaveSegura123*"
+        dni:
+          type: string
+          example: "1020304050"
+        name:
+          type: string
+          example: "Carlos González"
+        role:
+          type: string
+          enum: [ADMIN, LAWYER]
+          default: LAWYER
+
+    UserUpdateInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "abogado.gonzalez@pyme.com"
+        dni:
+          type: string
+          example: "1020304050"
+        name:
+          type: string
+          example: "Carlos González Modificado"
+        role:
+          type: string
+          enum: [ADMIN, LAWYER]
+
+    UserListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              email:
+                type: string
+              dni:
+                type: string
+              name:
+                type: string
+              role:
+                type: string
+              active:
+                type: boolean
+              createdAt:
+                type: string
+                format: date-time

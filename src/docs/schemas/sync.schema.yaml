@@ -1,0 +1,41 @@
+components:
+  schemas:
+    SyncResponseSuccess:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: Indica si la operación de encolado fue exitosa.
+        message:
+          type: string
+          example: La sincronización con la base de datos vectorial ha sido encolada.
+          description: Mensaje descriptivo del estado de la acción.
+        jobId:
+          type: string
+          example: "45"
+          description: ID único asignado por BullMQ a la tarea en Redis.
+        status:
+          type: string
+          example: queued
+          description: Estado inicial del background job.
+      required:
+        - success
+        - message
+        - jobId
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+          description: Indica que ocurrió un fallo en la solicitud.
+        message:
+          type: string
+          example: Acceso denegado Se requieren privilegios de administrador.
+          description: Detalle o motivo del error.
+      required:
+        - success
+        - message

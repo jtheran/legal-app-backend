@@ -1,0 +1,23 @@
+/sync/vectors:
+  get:
+    tags: [Sync Vectors]
+    summary: Disparar sincronización manual de vectores
+    description: >
+      Encola una tarea en segundo plano (BullMQ) para regenerar los embeddings de Prisma 
+      (Clientes y Casos) y subirlos a Qdrant. 
+      Acceso restringido a administradores.
+    security:
+      - bearerAuth: []
+    responses:
+      202:
+        description: Sincronización encolada con éxito en Redis
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncResponseSuccess'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - Requiere rol de ADMIN
+      500:
+        description: Error interno del servidor al intentar registrar la tarea en la cola de BullMQ

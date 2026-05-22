@@ -1,0 +1,72 @@
+components:
+  schemas:
+    CourtCreateInput:
+      type: object
+      required:
+        - name
+        - type
+        - city
+        - state
+      properties:
+        name:
+          type: string
+          example: "Juzgado 003 Civil del Circuito de Cartagena"
+        type:
+          type: string
+          enum: [CIVIL, PENAL, LABORAL, FAMILIA, ADMINISTRATIVO, COMERCIAL, CONSTITUCIONAL]
+          example: "CIVIL"
+        judgeName:
+          type: string
+          example: "Dr. Alberto Martínez Solís"
+        judgePhone:
+          type: string
+          example: "+573157778899"
+        judgeEmail:
+          type: string
+          format: email
+          example: "j03cctocartagena@cendoj.ramajudicial.gov.co"
+        city:
+          type: string
+          example: "Cartagena"
+        state:
+          type: string
+          example: "Bolivar"
+        country:
+          type: string
+          default: "Colombia"
+        address:
+          type: string
+          example: "Centro, Calle del Cuartel, Edificio Mariscal"
+        email:
+          type: string
+          format: email
+          example: "notificaciones_j03civ@ramajudicial.gov.co"
+        notes:
+          type: object
+          description: Campos JSON adicionales para guardar datos complementarios o metadatos de radicación
+          example: { "horarioAtencion": "8:00 AM - 4:00 PM", "requiereAudienciaPresencial": false }
+
+    CourtListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              type:
+                type: string
+              city:
+                type: string
+              judgeName:
+                type: string
+              isActive:
+                type: boolean

@@ -18,6 +18,10 @@ import maintenanceRoutes from './routes/maintenance.routes';
 import authRoutes from './routes/auth.routes';
 import chatRoutes from './routes/chat.routes';
 import caseRoutes from './routes/case.routes';
+import syncRoutes from './routes/sync.routes';
+import userRoutes from './routes/user.routes';
+import clientRoutes from './routes/client.routes';
+import courtRoutes from './routes/court.routes';
 
 
 interface AppLimiters {
@@ -52,6 +56,10 @@ export function createApp({ globalLimiter, authLimiter }: AppLimiters): Applicat
   app.use(`${config.API_PREFIX}/maintenance`, maintenanceRoutes);
   app.use(`${config.API_PREFIX}/chat`, chatRoutes);
   app.use(`${config.API_PREFIX}/cases`, caseRoutes);
+  app.use(`${config.API_PREFIX}/sync`, syncRoutes);
+  app.use(`${config.API_PREFIX}/users`, userRoutes);
+  app.use(`${config.API_PREFIX}/clients`, clientRoutes);
+  app.use(`${config.API_PREFIX}/courts`, courtRoutes);
 
 
   if (config.NODE_ENV !== 'production') {

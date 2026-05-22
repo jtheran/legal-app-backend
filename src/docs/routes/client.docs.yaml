@@ -1,0 +1,119 @@
+/clients:
+  get:
+    tags: [Clients]
+    summary: Listar clientes vinculados
+    description: >
+      Retorna los clientes asociados al abogado autenticado. 
+      Si el rol es ADMIN, retornará todos los clientes registrados en la plataforma.
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          default: 20
+    responses:
+      200:
+        description: Lista de clientes obtenida exitosamente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientListResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+  post:
+    tags: [Clients]
+    summary: Registrar un nuevo cliente
+    description: Crea un cliente asignándole de manera automática la propiedad al token del abogado actual.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientCreateInput'
+    responses:
+      201:
+        description: Cliente registrado correctamente
+      400:
+        description: Error de validación o conflicto de duplicidad (DNI/Email)
+      401:
+        $ref: '#/components/responses/Unauthorized'
+
+/clients/{id}:
+  get:
+    tags: [Clients]
+    summary: Obtener el detalle de un cliente
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Ficha de cliente recuperada
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - El cliente pertenece a otro bufete/abogado
+      404:
+        description: Cliente no encontrado
+
+  put:
+    tags: [Clients]
+    summary: Modificar información de un cliente
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientUpdateInput'
+    responses:
+      200:
+        description: Datos actualizados correctamente
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - No eres propietario de este registro
+
+  delete:
+    tags: [Clients]
+    summary: Eliminar permanentemente un cliente
+    description: Elimina el registro físico de la base de datos. Solo se permite si el cliente no cuenta con expedientes (`cases`) abiertos.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Cliente removido con éxito
+      400:
+        description: Conflicto - El cliente posee procesos judiciales activos en el sistema
+      401:
+        $ref: '#/components/responses/Unauthorized'

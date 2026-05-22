@@ -1,0 +1,44 @@
+components:
+  schemas:
+    NotificationListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              userId:
+                type: string
+                format: uuid
+              title:
+                type: string
+                example: "Nueva Actuación Judicial"
+              message:
+                type: string
+                example: "Se ha registrado un nuevo auto en el proceso radicado 13001400300320260012300"
+              type:
+                type: string
+                example: "CASE_UPDATE"
+              resourceId:
+                type: string
+                format: uuid
+                nullable: true
+                description: ID del recurso relacionado (ID del caso, ID de audiencia, etc.)
+                example: "a8b9c0d1-e2f3-4a5b-6c7d-8e9f0a1b2c3d"
+              read:
+                type: boolean
+                example: false
+              readAt:
+                type: string
+                format: date-time
+                nullable: true
+              createdAt:
+                type: string
+                format: date-time

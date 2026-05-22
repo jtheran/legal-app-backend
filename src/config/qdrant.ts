@@ -19,7 +19,7 @@ export const initQdrantCollection = async () => {
     if (!exists) {
         await qdrant.createCollection(collectionName, {
             vectors: {
-                size: 768, // AJUSTA ESTO: 768 para Nomic, 1536 para OpenAI, etc.
+                size: 192, // AJUSTA ESTO: 768 para Nomic, 1536 para OpenAI, etc.
                 distance: "Cosine"
             }
         });
