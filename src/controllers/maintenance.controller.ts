@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import redisClient from '../config/redis'
+import { createAuditLog } from '../services/audit.services'
 import { prisma } from '../config/db'
 import si from 'systeminformation'
 import os from 'os'
@@ -15,7 +16,7 @@ export const enableMaintenance = async (req: Request, res: Response) => {
     } = req.body
 
     const data = {
-      active: true,
+      isActive: true,
       message,
       estimatedEnd: estimatedEnd || null,
       startedAt: new Date().toISOString(),
@@ -26,7 +27,14 @@ export const enableMaintenance = async (req: Request, res: Response) => {
     await redisClient.set('system:maintenance', JSON.stringify(data))
 
     console.warn(`🚧 Mantenimiento activado por ${data.startedBy}`)
-
+    await createAuditLog({
+        userEmail: user?.email,
+        action: 'ACTIVED',
+        resource: 'maintenance',
+        status: 'SUCCESS',
+        ip: req.ip,
+        description: 'Modo Mantenimiento Activo'
+    });
     res.json({
       message: 'Modo mantenimiento activado',
       data,
@@ -42,22 +50,40 @@ export const disableMaintenance = async (req: Request, res: Response) => {
     await redisClient.del('system:maintenance')
 
     console.info(`✅ Mantenimiento desactivado por ${user?.email || 'system'}`)
-
+    await createAuditLog({
+      userEmail: user?.email,
+      action: 'DESACTIVATED',
+      resource: 'maintenance',
+      status: 'SUCCESS',
+      ip: req.ip,
+      description: 'Modo Mantenimiento Desactivado'
+  });
     res.json({ message: 'Modo mantenimiento desactivado. Plataforma disponible.' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
 }
 
-export const getMaintenanceStatus = async (_req: Request, res: Response) => {
+export const getMaintenanceStatus = async (req: Request, res: Response) => {
   try {
-    const data = await redisClient.get('system:maintenance')
-    if (!data) {
-      return res.json({ active: false, message: 'Plataforma operativa' })
+    const maintenance = await redisClient.get('system:maintenance');
+    
+    if (!maintenance) {
+      return res.json({ isActive: false });
     }
-    res.json({ active: true, ...JSON.parse(data) })
+    const data = JSON.parse(maintenance);
+    
+    // Normalizamos la respuesta para el frontend
+    return res.json({
+      isActive: data.active || data.isActive || false,
+      message: data.message,
+      estimatedEnd: data.estimatedEnd,
+      startedAt: data.startedAt,
+      startedBy: data.startedBy
+    });
+    
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
 

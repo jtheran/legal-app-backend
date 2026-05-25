@@ -1,0 +1,66 @@
+/settings:
+  get:
+    tags: [System Settings]
+    summary: Listar variables de configuración del sistema
+    description: >
+      Retorna el listado completo de configuraciones dinámicas de la infraestructura 
+      almacenadas en la base de datos PostgreSQL. Acceso restringido a administradores.
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: Listado de variables de entorno dinámicas recuperado con éxito
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemSettingsListResponse'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - Requiere rol de ADMIN
+
+  post:
+    tags: [System Settings]
+    summary: Actualizar variables de entorno dinámicas en lote
+    description: >
+      Actualiza o crea de forma transaccional un lote de variables del sistema en la base de 
+      datos y purga de manera inmediata sus respectivas llaves en la caché de Redis.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateSystemSettingsRequest'
+    responses:
+      200:
+        description: Configuraciones actualizadas y memoria caché sincronizada con éxito
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: "Configuraciones actualizadas con éxito y memoria caché sincronizada."
+      400:
+        description: Estructura de lote inválida o payload corrupto
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: "El cuerpo de la petición debe contener un array 'settings'."
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        description: Prohibido - Requiere rol de ADMIN

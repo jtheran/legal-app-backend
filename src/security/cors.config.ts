@@ -9,6 +9,7 @@ const allowedOrigins = config.NODE_ENV === 'production'
   : [
       'http://localhost:4589',
       'http://localhost:4568',
+      'http://192.168.1.42',
     ]
 
 export const corsConfig = cors({

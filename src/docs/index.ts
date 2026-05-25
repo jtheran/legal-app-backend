@@ -45,7 +45,7 @@ export const buildSwaggerDocument = () => ({
       schemes: ['http'],
     },
     {
-      url: `https://${config.HOST}:${config.PORT}${config.API_PREFIX}`,
+      url: `http://${config.HOST}:${config.PORT}${config.API_PREFIX}`,
       description: 'Servidor de producción',
       schemes: ['https'],
     },

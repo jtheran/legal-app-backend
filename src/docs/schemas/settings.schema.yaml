@@ -1,0 +1,60 @@
+components:
+  schemas:
+    SystemSettingItem:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Identificador o nombre clave único de la variable de entorno.
+          example: "AI_MODEL"
+        value:
+          type: string
+          description: El valor asignado a la configuración actual serializado como texto.
+          example: "microsoft/phi-4-multimodal-instruct"
+        description:
+          type: string
+          nullable: true
+          description: Nota explicativa sobre el impacto de la variable en el ecosistema legal.
+          example: "Modelo de lenguaje principal para análisis y procesamiento de expedientes judiciales."
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-05-22T16:30:00.000Z"
+
+    SystemSettingsListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SystemSettingItem'
+
+    UpdateSystemSettingsPayloadItem:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Nombre de la variable de entorno dinámica a crear o modificar.
+          example: "RATE_LIMIT_MAX"
+        value:
+          type: string
+          description: Nuevo valor asignado (debe convertirse a string desde el cliente).
+          example: "150"
+
+    UpdateSystemSettingsRequest:
+      type: object
+      required:
+        - settings
+      properties:
+        settings:
+          type: array
+          description: Colección en lote de variables para actualización transaccional.
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/UpdateSystemSettingsPayloadItem'

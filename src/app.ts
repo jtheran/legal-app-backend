@@ -22,6 +22,7 @@ import syncRoutes from './routes/sync.routes';
 import userRoutes from './routes/user.routes';
 import clientRoutes from './routes/client.routes';
 import courtRoutes from './routes/court.routes';
+import notificationsRoutes from './routes/notification.routes';
 
 
 interface AppLimiters {
@@ -60,6 +61,7 @@ export function createApp({ globalLimiter, authLimiter }: AppLimiters): Applicat
   app.use(`${config.API_PREFIX}/users`, userRoutes);
   app.use(`${config.API_PREFIX}/clients`, clientRoutes);
   app.use(`${config.API_PREFIX}/courts`, courtRoutes);
+  app.use(`${config.API_PREFIX}/notifications`, notificationsRoutes);
 
 
   if (config.NODE_ENV !== 'production') {
